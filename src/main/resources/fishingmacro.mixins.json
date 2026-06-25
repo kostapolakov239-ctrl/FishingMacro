@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.fishingmacro.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [],
+  "client": [
+    "ScreenEventMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
