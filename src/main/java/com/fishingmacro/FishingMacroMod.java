@@ -1,76 +1,84 @@
 package com.fishingmacro;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.MinecraftClient;
+import com.fishingmacro.commands.CommandManager;
+import com.fishingmacro.config.Config;
+import com.fishingmacro.hud.HudRenderer;
+import com.fishingmacro.InventoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FishingMacroMod implements ClientModInitializer {
-	public static final Logger LOGGER = LoggerFactory.getLogger("fishingmacro");
 	public static final String MOD_ID = "fishingmacro";
+	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static KeyBinding toggleFishingKey;
-	public static KeyBinding toggleKillauraKey;
-
+	// Toggle states
 	public static boolean fishingEnabled = false;
 	public static boolean killauraEnabled = false;
 
 	@Override
 	public void onInitializeClient() {
-		LOGGER.info("Fishing Macro initialized!");
-
-		// Register keybindings
-		toggleFishingKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-			"key.fishingmacro.toggle_fishing",
-			InputUtil.Type.KEYSYM,
-			GLFW.GLFW_KEY_F,
-			"category.fishingmacro.main"
-		));
-
-		toggleKillauraKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-			"key.fishingmacro.toggle_killaura",
-			InputUtil.Type.KEYSYM,
-			GLFW.GLFW_KEY_K,
-			"category.fishingmacro.main"
-		));
-
-		// Register tick event for auto-clicking
+		LOGGER.info("Initializing Fishing Macro...");
+		
+		// Load config
+		Config.load();
+		
+		// Register commands
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> 
+			CommandManager.register(dispatcher, registryAccess)
+		);
+		
+		// Register client tick for macros
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.player == null) return;
-
-			// Toggle fishing
-			if (toggleFishingKey.wasPressed()) {
-				fishingEnabled = !fishingEnabled;
-				String status = fishingEnabled ? "§aENABLED" : "§cDISABLED";
-				client.player.sendMessage(
-					net.minecraft.text.Text.of("§6Fishing Macro: " + status),
-					true
-				);
-			}
-
-			// Toggle killaura
-			if (toggleKillauraKey.wasPressed()) {
-				killauraEnabled = !killauraEnabled;
-				String status = killauraEnabled ? "§aENABLED" : "§cDISABLED";
-				client.player.sendMessage(
-					net.minecraft.text.Text.of("§6Kill Aura: " + status),
-					true
-				);
-			}
-
-			// Run fishing logic
-			if (fishingEnabled) {
-				FishingMacro.tick(client);
-			}
-
-			// Run killaura logic
+			
+			// Run Kill Aura if enabled
 			if (killauraEnabled) {
 				KillAura.tick(client);
 			}
+			
+			// Auto-switch to fishing rod if fishing is enabled
+			if (fishingEnabled) {
+				int fishingSlot = InventoryHelper.findFishingRodSlot(client);
+				if (fishingSlot != -1) {
+					client.player.getInventory().selectedSlot = fishingSlot;
+				}
+			}
 		});
+		
+		// Register HUD render
+		HudRenderCallback.EVENT.register((context, tickCounter) -> 
+			HudRenderer.render(context, tickCounter)
+		);
+		
+		LOGGER.info("Fishing Macro loaded successfully!");
+	}
+
+	/**
+	 * Toggle fishing macro on/off
+	 */
+	public static void toggleFishing() {
+		fishingEnabled = !fishingEnabled;
+		String state = fishingEnabled ? "§aON" : "§cOFF";
+		MinecraftClient.getInstance().player.sendMessage(
+			net.minecraft.text.Text.of("§6Fishing Macro: " + state),
+			true
+		);
+	}
+
+	/**
+	 * Toggle kill aura on/off
+	 */
+	public static void toggleKillAura() {
+		killauraEnabled = !killauraEnabled;
+		String state = killauraEnabled ? "§aON" : "§cOFF";
+		MinecraftClient.getInstance().player.sendMessage(
+			net.minecraft.text.Text.of("§6Kill Aura: " + state),
+			true
+		);
 	}
 }
