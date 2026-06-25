@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "fishingmacro",
+  "version": "${version}",
+  "name": "Fishing Macro",
+  "description": "Auto fishing macro with kill aura for Skyblock",
+  "authors": [
+    "bxdbxdbdhx-design"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/fishingmacro/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "com.fishingmacro.FishingMacroMod"
+    ]
+  },
+  "mixins": [
+    "fishingmacro.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric-api": "*",
+    "minecraft": "1.20.1"
+  }
+}
