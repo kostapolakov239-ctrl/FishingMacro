@@ -3,6 +3,7 @@ package com.fishingmacro;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -56,11 +57,12 @@ public class KillAura {
 
 		return client.world.getEntities().stream()
 			.filter(entity -> entity instanceof LivingEntity)
+			.filter(entity -> !(entity instanceof PlayerEntity)) // ВАЖНО: НЕ атаковать игроков!
 			.filter(entity -> entity != client.player)
 			.map(entity -> (LivingEntity) entity)
 			.filter(entity -> !entity.isDead())
 			.filter(entity -> client.player.distanceTo(entity) <= KILL_AURA_RANGE)
-			// KEY: Only attack mobs with level markers like [Lv10], [Lv20], etc.
+			// KEY: Only attack mobs with level markers like [Lv5], [Lv10], [Lv52], [Lv31], etc.
 			.filter(entity -> hasLevelMarker(entity))
 			.min(Comparator.comparingDouble(entity -> client.player.distanceTo(entity)))
 			.orElse(null);
@@ -72,7 +74,8 @@ public class KillAura {
 		}
 		
 		String name = entity.getCustomName().getString();
-		// Check for Hypixel-style level markers: [Lv10], [Lv20], etc.
+		// Check for Hypixel-style level markers: [Lv5], [Lv10], [Lv52], [Lv31], etc.
+		// Pattern: [Lv + одна или несколько цифр + ]
 		return name.matches(".*\\[Lv\\d+\\].*");
 	}
 
