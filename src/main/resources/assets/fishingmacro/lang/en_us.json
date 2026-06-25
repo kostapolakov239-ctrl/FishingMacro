@@ -1,5 +1,5 @@
 {
-  "key.fishingmacro.toggle_fishing": "Toggle Fishing Macro",
-  "key.fishingmacro.toggle_killaura": "Toggle Kill Aura",
-  "category.fishingmacro.main": "Fishing Macro"
+  "category.fishingmacro.main": "Fishing Macro",
+  "key.fishingmacro.fishing_toggle": "Toggle Fishing Macro",
+  "key.fishingmacro.killaura_toggle": "Toggle Kill Aura"
 }
