@@ -27,6 +27,9 @@ public class FishingMacroMod implements ClientModInitializer {
 		// Load config
 		Config.load();
 		
+		// Register keybindings
+		KeyBindings.register();
+		
 		// Register commands
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> 
 			CommandManager.register(dispatcher, registryAccess)
